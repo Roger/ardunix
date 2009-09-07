@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+import os
+import sys
+import time
+import lib.build
+
+def help():
+    print '-r remove old project'
+    print '-p build path, default where .pde file is'
+    print '-b not build'
+    print '-m not create Makefile'
+    exit()
+
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print 'one argument needed'
+        help()
+    try:
+        data = lib.build.makefile(sys.argv[1])
+    except:
+        print 'Invalid Pde File'
+        exit()
+    proj_path = os.path.dirname(sys.argv[1])
+    makefile_path = os.path.join(proj_path, 'Makefile')
+    if os.path.exists(makefile_path):
+        print 'building existent project in "%s" if you want to '\
+                    'recreate it use -r' % proj_path
+    else:
+        if not os.path.exists(proj_path):
+            os.makedirs(proj_path)
+        fd = open(makefile_path, 'w')
+        fd.write(data)
+        fd.close()
+
+    if lib.build.compile(makefile_path):
+        print 'build sucefull'
+        if lib.build.upload(makefile_path):
+            print 'upload sucefull'
+    print 'Build and Upload complete'
